@@ -136,5 +136,13 @@ namespace SBDDAL
             }
         }
 
+        public static string GenerateUniqueId()
+        {
+            Random random = new Random();
+            int randomValue = random.Next(0, 65536); // Generate a random number between 0 and 65535
+            string uniqueId = randomValue.ToString("X4"); // Convert to a 4-digit hexadecimal string
+            return uniqueId;
+        }
+
     }
 }

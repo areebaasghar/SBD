@@ -7,20 +7,14 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace SBDModelClass
 {
-    //SurveyId varchar(50) Unchecked
-    //UserID  varchar(50) Checked
-
-
     public class EntSurvey
-    {
+    {   
+        public string SurveyId { get; set; }
         public string? Title { get; set; }
         public string? Description { get; set; }
         public string? Education { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-
-
-
+        public DateTime? StartDate { get; set; } = DateTime.Now;
+        public DateTime? EndDate { get; set; } = DateTime.Now.AddDays(30);
 
     }
 }

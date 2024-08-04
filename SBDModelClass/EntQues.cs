@@ -14,3 +14,4 @@ namespace SBDModelClass
         public string? QuestionType { get; set; }
     }
 }
+
