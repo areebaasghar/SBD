@@ -1,0 +1,10 @@
+﻿@page "/test"
+@page "/test/1"
+@rendermode InteractiveServer
+<h3>NewMaster</h3>
+<input type="text" placeholder="Enter Id" @bind="fid" @bind:event="oninput" />
+
+
+@code {
+    public string fid { get; set; } = "";
+}

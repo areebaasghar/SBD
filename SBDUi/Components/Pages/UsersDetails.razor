@@ -1,0 +1,78 @@
+﻿@page "/userdetails"
+@rendermode InteractiveServer
+@inject NavigationManager nm
+
+
+<h3>Users Details</h3>
+
+
+<NavLink class="btn btn-primary" href="adduser">
+    Add New
+</NavLink>
+
+<table class="table table-bordered mt-5">
+    <tr>
+        <th>
+            User Id
+        </th>
+        <th>
+            First Name
+        </th>
+        <th>
+            Last Name
+        </th>
+        <th>
+            CNIC #
+        </th>
+        <th>
+            Action
+        </th>
+    </tr>
+    @foreach (var item in entUserInfo)
+    {
+        <tr>
+            <td>@item.UserId</td>
+            <td>@item.FirstName</td>
+            <td>@item.LastName</td>
+            <td>@item.Cnic</td>
+            <td>
+                <button class="btn btn-outline-danger btn-sm" @onclick="@(e => DeleteUserAsync(item.UserId))">Del</button>
+                <button class="btn btn-outline-danger btn-sm" @onclick="@(e => Edit(item.UserId))">Edit</button>
+
+            </td>
+        </tr>
+
+    }
+</table>
+
+
+@code {
+
+
+    private List<EntUserInfo> entUserInfo { get; set; } = new List<EntUserInfo>();
+
+    EntUserInfo entInfo = new EntUserInfo();
+
+    protected override async Task OnInitializedAsync()
+    {
+        entUserInfo = await CRUD.ReadDataAsync<EntUserInfo>("sp_ReadAllUserInfo",null);
+
+    }
+
+    private async Task DeleteUserAsync(string id)
+    {
+        EntUserInfo entInfo = new EntUserInfo();
+        entInfo.UserId = id;
+        await CRUD.CUDAsync(entInfo, "sp_DeleteUserInfo");
+        entUserInfo = await CRUD.ReadDataAsync<EntUserInfo>("sp_ReadAllUserInfo",null);
+
+    }
+
+    private void Edit(string UserId)
+    {
+        nm.NavigateTo("edituser/" + UserId);
+        //entInfo = entUserInfo.Find(item => item.UserId == UserId);
+
+    }
+
+}

@@ -1,0 +1,9 @@
+﻿@page "/master"
+@rendermode InteractiveServer
+<h3>NewMaster</h3>
+<input type="text" placeholder="Enter Id" @bind="fid" @bind:event="oninput" />
+<SubMaster Id="@fid"></SubMaster>
+
+@code {
+    public string fid { get; set; } = "Bravo";
+}

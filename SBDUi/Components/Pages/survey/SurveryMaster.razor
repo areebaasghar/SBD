@@ -1,0 +1,65 @@
+﻿@page "/surveymaster"
+<h3>SurveryTemplate</h3>
+<EditForm Model="ents" OnSubmit="Save" FormName="Survey">
+
+    <table class="table table-bordered mt-5">
+    <tr>
+        <td>
+                <input type="text" name="name" placeholder="Enter Survey Title" @bind-value="ents.Title" />
+        </td>
+   
+    </tr>
+
+    <tr>
+        <td>
+            <input type="text" name="name" placeholder="Enter The limit of Education for targetted audience " @bind-value="ents.Education" />
+        </td>
+    </tr>
+
+    <tr>
+         <td>
+            <textarea type="text" name="name" placeholder="Enter the description if you want to write any " @bind="ents.Description" />
+         </td>
+
+    </tr>
+
+    <tr>
+        <td>
+                <label>
+                    starting date for survey
+                </label>
+                <br />
+                <input type="date" name="name" @bind-value="ents.StartDate" />
+        </td>
+    </tr>
+
+     <tr>
+        <td>
+                <label>
+                    Ending date for survey
+                </label>
+                <br />
+                <input type="date" name="name" @bind-value="ents.EndDate" />
+        </td>
+    </tr>
+
+    </table>
+    
+   
+   
+    <button type="submit">Save</button>
+
+    </EditForm>
+
+@code {
+
+         EntSurvey ents { get; set; } = new EntSurvey();
+
+
+        public void Save()
+        {
+        
+        }
+
+
+}

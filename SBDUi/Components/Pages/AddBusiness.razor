@@ -1,0 +1,97 @@
+﻿@page "/addBusinessDetails"
+@page "/editbusiness/{bid}"
+@rendermode InteractiveServer
+@inject NavigationManager nm;
+
+<h3>Add Business</h3>
+<EditForm Model="entbd" OnSubmit="SaveUpdate">
+    <input type="text" name="name" placeholder="User Id" @bind-value="entbd.UserID" />
+    <input type="text" name="name" placeholder="Business  Id" @bind-value="entbd.BusinessId" />
+    <input type="text" name="name" placeholder="Business Name" @bind-value="entbd.BusinessName" />
+    <input type="text" name="name" placeholder="Business Address" @bind-value="entbd.BusinessAddress" />
+    <input type="text" name="name" placeholder="+92XXXXXXXXXX" autocomplete="tel" @bind-value="entbd.BusinessPhone" @oninput="FormatPhone" maxlength="13" class="input-field" />
+    <input type="text" name="name" placeholder="Buisness Email" @bind-value="entbd.BusinessEmail" />
+    <button type="submit">@ButtonName</button>
+    <p class="text-danger">@ErrorMessage</p>
+</EditForm>
+
+@code {
+    [Parameter] public string? bid { get; set; }//[parameter]?
+    EntBD entbd { get; set; } = new EntBD(); // {get; set;}?
+    private string ErrorMessage;
+
+    private string ButtonName { get; set; } = "Save";
+
+    private async Task SaveUpdate()
+    {
+
+        try
+        {
+            if (ButtonName == "Save")
+
+            {
+
+                await CRUD.CUDAsync(entbd, "sp_CreateBusinessDetails");
+            }
+            else
+            {
+                await CRUD.CUDAsync(entbd, "sp_UpdateBusinessDetails");
+
+            }
+            nm.NavigateTo("businessdetails");
+
+        }
+
+        catch (Exception ex)
+        {
+            ErrorMessage = "*All fields required* ";
+            throw ex;
+
+        }
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(bid))
+        {
+            ButtonName = "Update";
+            await GetBusinessInfo();
+        }
+        
+    }
+
+    private async Task GetBusinessInfo()
+    {
+        EntBD eu = new EntBD();
+        List<EntBD> EntBDs = new List<EntBD>();
+        eu.BusinessId = bid;
+        EntBDs = await SBDDAL.CRUD.ReadDataAsync<EntBD>("sp_ReadBusinessDetails", eu);
+
+        if (EntBDs.Count > 0)
+        {
+            entbd = EntBDs[0];
+        }
+        else
+        {
+            entbd = null;
+        }
+    }
+
+    private void FormatPhone(ChangeEventArgs e)
+    {
+        var input = e.Value.ToString();
+        input = new string(input.Where(char.IsDigit).ToArray());
+
+        if (!input.StartsWith("92")) input = "92" + input;
+
+        if (input.Length > 12) input = input.Substring(0, 12);
+
+        entbd.BusinessPhone = "+" + input;
+    }
+}
+
+
+
+
+

@@ -1,0 +1,109 @@
+﻿@page "/adduser"
+@page "/edituser/{uid}"
+@rendermode InteractiveServer
+@inject NavigationManager nm;
+
+<h3>Add Users</h3>
+<EditForm Model="entInfo" OnSubmit="SaveUpdate" FormName="userRegistration">
+    <input type="text" name="name" placeholder="User Id" @bind-value="entInfo.UserId" />
+    <input type="text" name="name" placeholder="First Name" @bind-value="entInfo.FirstName" />
+    <input type="text" name="name" placeholder="Last Name" @bind-value="entInfo.LastName" />
+    <input type="text" name="name" placeholder="City" @bind-value="entInfo.City" />
+    <input type="text" name="name" placeholder="Gender" @bind-value="entInfo.Gender" />
+    <input type="text" name="name" placeholder="XXXXX-XXXXXXX-X (CNIC)" @bind-value="entInfo.Cnic" @oninput="FormatCNIC" maxlength="15" class="input-field" />
+    <input type="text" name="name" placeholder="+92XXXXXXXXXX" autocomplete="tel" @bind-value="entInfo.PhoneNo" @oninput="FormatPhone" maxlength="13" class="input-field" />
+    <input type="date" name="name" placeholder="DOB" @bind-value="entInfo.DOB" />
+    <button type="submit">@ButtonName</button>
+    <p>@ErrorMessage</p>
+
+
+</EditForm>
+ 
+
+@code {
+    [Parameter] public string? uid{ get; set; }//[parameter]?
+    EntUserInfo entInfo { get; set; } = new EntUserInfo(); // {get; set;}?
+    private string ErrorMessage { get; set; } = "";
+
+    private string ButtonName { get; set; } = "Save";
+
+    private async Task SaveUpdate()
+    {
+
+        try
+        {
+            if (ButtonName == "Save")
+            {
+                await CRUD.CUDAsync(entInfo, "sp_CreateUserInfo");
+            }
+            else
+            {
+                await CRUD.CUDAsync(entInfo, "sp_UpdateUserInfo");
+
+            }
+            nm.NavigateTo("userdetails");
+
+        }
+
+        catch (Exception ex)
+        {
+            ErrorMessage = "*All fields required * Unique username * Unique CNIC";
+            throw ex;
+
+
+        }
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(uid))
+        {
+            ButtonName = "Update";
+            await GetUserInfo();
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task GetUserInfo()
+    {
+        EntUserInfo eu = new EntUserInfo();
+        List<EntUserInfo> entUserInfos = new List<EntUserInfo>();
+        eu.UserId = uid;
+        entUserInfos = await SBDDAL.CRUD.ReadDataAsync<EntUserInfo>("sp_ReadUserInfo", eu);
+
+        if (entUserInfos.Count > 0)
+        {
+            entInfo = entUserInfos[0];
+        }
+        else
+        {
+            // Handle the case when no user info is returned, if needed
+            entInfo = null;
+        }
+    }
+    
+    private void FormatCNIC(ChangeEventArgs e)
+    {
+        var input = e.Value.ToString();
+        input = new string(input.Where(char.IsDigit).ToArray());
+
+        if (input.Length > 5) input = input.Insert(5, "-");
+        if (input.Length > 13) input = input.Insert(13, "-");
+
+        entInfo.Cnic = input.Length > 15 ? input.Substring(0, 15) : input;
+    }
+
+    private void FormatPhone(ChangeEventArgs e)
+    {
+        var input = e.Value.ToString();
+        input = new string(input.Where(char.IsDigit).ToArray());
+
+        if (!input.StartsWith("92")) input = "92" + input;
+
+        if (input.Length > 12) input = input.Substring(0, 12);
+
+        entInfo.PhoneNo = "+" + input;
+    }
+}

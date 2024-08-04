@@ -1,0 +1,84 @@
+﻿@page "/submaster"
+@inject NavigationManager nm
+
+<table class="table table-bordered mt-auto">
+    <tr>
+        <th>Business Id</th>
+        <th>User Id</th>
+        <th>Business Name</th>
+        <th>Business Address</th>
+        <th>Business Phone</th>
+        <th>Business Email</th>
+        <th>Action</th>
+    </tr>
+    @if(entBdInfo.Any())
+    {
+        foreach (var item in entBdInfo)
+        {
+            <tr>
+                <td>@item.BusinessId</td>
+                <td>@item.UserID</td>
+                <td>@item.BusinessName</td>
+                <td>@item.BusinessAddress</td>
+                <td>@item.BusinessPhone</td>
+                <td>@item.BusinessEmail</td>
+                <td>
+                    <button class="btn btn btn-sm" @onclick="@(e => DeleteUserAsync(item.BusinessId))">Del</button>
+                    <button class="btn btn-outline-danger btn-sm" @onclick="@(e => Edit(item.BusinessId))">Edit</button>
+                </td>
+            </tr>
+        }
+    }
+    else
+    {
+        <td colspan="7">No Business Details found</td>
+    }
+
+    
+</table>
+
+@code {
+    private List<EntBD> entBdInfo { get; set; } = new List<EntBD>();
+    private EntBD entBD = new EntBD();
+
+    [Parameter] public string Id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        entBdInfo = await CRUD.ReadDataAsync<EntBD>("sp_ReadAllBusinessDetails", null);
+        FilterData(Id);
+    }
+
+    protected async override void OnInitialized()
+    {
+        Console.WriteLine("OnInitialized");
+        entBdInfo = await CRUD.ReadDataAsync<EntBD>("sp_ReadAllBusinessDetails", null);
+        base.OnInitialized();
+    }
+
+    private void FilterData(string id)
+    {
+        if (!string.IsNullOrEmpty(id))
+        {
+            entBD = entBdInfo.Find(item => item.BusinessId == id);
+            entBdInfo = new List<EntBD>();
+            if (entBD != null)
+            {
+                entBdInfo.Add(entBD);
+            }
+        }
+    }
+
+    public async Task DeleteUserAsync(string id)
+    {
+        EntBD entInfo = new EntBD();
+        entInfo.BusinessId = id;
+        await CRUD.CUDAsync(entInfo, "sp_DeleteBusinessDetails");
+        entBdInfo = await CRUD.ReadDataAsync<EntBD>("sp_ReadAllBusinessDetails", null);
+    }
+
+    public void Edit(string BusinessId)
+    {
+        nm.NavigateTo("editbusiness/" + BusinessId);
+    }
+}

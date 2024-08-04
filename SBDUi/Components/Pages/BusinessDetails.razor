@@ -1,0 +1,80 @@
+﻿@page "/businessdetails"
+<h3>BusinessDetails</h3>
+@rendermode InteractiveServer
+@inject NavigationManager nm
+
+
+<NavLink class="btn btn-primary" href="addBusinessDetails">
+    Add New Business
+</NavLink>
+
+<table class="table table-bordered mt-5">
+    <tr>
+        <th>
+            Business Id
+        </th>
+        <th>
+            User  Id
+        </th>
+        <th>
+            Business Name
+        </th>
+        <th>
+            Business Address
+        </th>
+        <th>
+            Business Phone
+        </th>
+        <th>
+            Business Email
+        </th>
+
+        <th>
+            Action
+        </th>
+    </tr>
+    @foreach (var item in entBdInfo)
+    {
+        <tr>
+            <td>@item.BusinessId</td>
+            <td>@item.UserID</td>
+            <td>@item.BusinessName</td>
+            <td>@item.BusinessAddress</td>
+            <td>@item.BusinessPhone</td>
+            <td>@item.BusinessEmail</td>
+            <td>
+                <button class="btn btn-outline-danger btn-sm" @onclick="@(e => DeleteUserAsync(item.BusinessId))">Del</button>
+                <button class="btn btn-outline-danger btn-sm" @onclick="@(e => Edit(item.BusinessId))">Edit</button>
+            </td>
+        </tr>
+
+    }
+</table>
+
+
+@code {
+
+
+    private List<EntBD> entBdInfo { get; set; } = new List<EntBD>();
+
+    EntBD entInfo = new EntBD();
+
+    protected override async Task OnInitializedAsync()
+    {
+        entBdInfo = await CRUD.ReadDataAsync<EntBD>("sp_ReadAllBusinessDetails", null);
+    }
+
+    public async Task DeleteUserAsync(string id)
+    {
+        EntBD entInfo = new EntBD();
+        entInfo.BusinessId = id;
+        await CRUD.CUDAsync(entInfo, "sp_DeleteBusinessDetails");
+        entBdInfo = await CRUD.ReadDataAsync<EntBD>("sp_ReadAllBusinessDetails", null);
+    }
+
+    public void Edit(string BusinessId)
+    {
+        nm.NavigateTo("editbusiness/" + BusinessId);
+    }
+
+}

@@ -1,0 +1,6 @@
+@SBD_HostAddress = http://localhost:5042
+
+GET {{SBD_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

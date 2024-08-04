@@ -1,0 +1,94 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+<h3>Smart Business Decision GUI</h3>
+
+@* 
+<button @onclick="GetData">Load Data</button>
+<button @onclick=" Getauthdata">Authentication Data</button>
+
+<hr />
+
+<table class="table table-striped">
+    <tr>
+        <th>
+            First Name
+        </th>
+        <th>
+            Last Name
+        </th>
+        <th>
+            CNIC #
+        </th>
+    </tr>
+    @foreach (var item in entUserInfo)
+    {
+        <tr>
+            <td>@item.FirstName</td>
+            <td>@item.LastName</td>
+            <td>@item.Cnic</td>
+        </tr>
+
+    }
+</table>
+
+<table class="table table-striped">
+    <tr>
+        <th>
+            Email
+        </th>
+        <th>
+            UserId
+        </th>
+        <th>
+            Password
+        </th>
+
+        <th>
+            Created at
+        </th>
+        <th>
+            Updated at
+        </th>
+    </tr>
+    @foreach (var item in entauth)
+    {
+        <tr>
+            <td>@item.Email</td>
+            <td>@item.UserId</td>
+            <td>@item.PasswordHash</td>
+            <td>@item.CreatedAt</td>
+            <td>@item.UpdatedAt</td>
+        </tr>
+
+    }
+</table> *@
+
+
+
+@code
+
+{
+   @*  private List<EntUserInfo> entUserInfo { get; set; } = new List<EntUserInfo>();
+    private List<EntAth> entauth { get; set; } = new List<EntAth>();
+
+    protected override async Task OnInitializedAsync()
+    {
+     entUserInfo = await CRUD.ReadDataAsync<EntUserInfo>("sp_ReadAllUserInfo"); 
+        
+    }
+
+    private async Task GetData()
+    {
+        entUserInfo = await CRUD.ReadDataAsync<EntUserInfo>("sp_ReadAllUserInfo");
+
+
+    }
+
+    private async Task Getauthdata()
+    {
+
+        entauth = await CRUD.ReadDataAsync<EntAth>("sp_readauthentications");
+    } *@
+
+}
