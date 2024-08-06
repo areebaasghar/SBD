@@ -1,0 +1,123 @@
+﻿@page "/addsurveydetails"
+@page "/editsurvey/{sid}"
+@inject NavigationManager nm
+@rendermode InteractiveServer
+<h3>New Survey</h3>
+<EditForm Model="ents" OnSubmit="SaveUpdate" FormName="Survey">
+    <table class="table table-bordered mt-5">
+        <tr>
+            <td>
+                <input type="text" name="name" placeholder="Enter Survey Id" @bind-value="ents.SurveyId" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" name="name" placeholder="Enter Survey Title" @bind-value="ents.Title" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" name="name" placeholder="Enter User Id" @bind-value="ents.UserID" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" name="name" placeholder="Enter The limit of Education for targetted audience" @bind-value="ents.Education" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <textarea name="name" placeholder="Enter the description if you want to write any" @bind="ents.Description" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>Starting date for survey</label>
+                <br />
+                <input type="date" name="name" @bind-value="ents.StartDate" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label>Ending date for survey</label>
+                <br />
+                <input type="date" name="name" @bind-value="ents.EndDate" />
+            </td>
+        </tr>
+    </table>
+   <button type="submit">Next</button>
+    <p class="text-danger">@ErrorMessage</p>
+</EditForm>
+
+
+@code {
+
+    [Parameter] public string? sid { get; set; }
+    EntSurvey ents { get; set; } = new EntSurvey();
+   
+    private string ErrorMessage;
+    private string ButtonName { get; set; } = "Save";
+
+    private async Task SaveUpdate()
+    {
+        try
+        {
+            if (ButtonName == "Save")
+
+            {
+
+                await CRUD.CUDAsync(ents, "sp_CreateSurvey");
+               
+            }
+            else if (ButtonName=="Update")
+            {
+                await CRUD.CUDAsync(ents, "sp_UpdateSurvey");
+
+
+             
+
+            }
+            nm.NavigateTo("survey/"+ents.SurveyId);
+           
+
+        }
+
+        catch (Exception ex)
+        {
+            ErrorMessage = "*All fields required* ";
+            throw ex;
+        }
+
+    }
+
+     protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrEmpty(sid))
+        {
+            ButtonName = "Update";
+            await GetSurveyInfo();
+        }
+        
+    }
+
+    private async Task GetSurveyInfo()
+    {
+        EntSurvey eu = new EntSurvey();
+        List<EntSurvey> Ents = new List<EntSurvey>();
+        eu.SurveyId = sid;
+        Ents = await SBDDAL.CRUD.ReadDataAsync<EntSurvey>("sp_ReadSurvey", eu);
+
+        if (Ents.Count > 0)
+        {
+            ents = Ents[0];
+        }
+        else
+        {
+            ents = null;
+        }
+    }
+
+
+}
+    
+            

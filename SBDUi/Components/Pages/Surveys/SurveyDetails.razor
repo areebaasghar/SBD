@@ -1,0 +1,78 @@
+﻿@page "/SurveyDetails"
+@rendermode InteractiveServer
+@inject NavigationManager nm
+
+<NavLink class="btn btn-primary" href="addsurveydetails">
+    Add New Survey
+</NavLink>
+
+
+<table class="table table-bordered mt-5">
+    <tr>
+        <th>
+            Survey Id
+        </th>
+        <th>
+            User  Id
+        </th>
+        <th>
+            Survey Title
+        </th>
+        <th>
+            Start Date
+        </th>
+        <th>
+            End Date
+        </th>
+   
+
+        <th>
+            Action
+        </th>
+    </tr>
+    @foreach (var item in entSurveyInfo)
+    {
+        <tr>
+            <td>@item.SurveyId</td>
+            <td>@item.UserID</td>
+            <td>@item.Title</td>
+            <td>@item.StartDate</td>
+            <td>@item.EndDate</td>
+            <td>
+                <button class="btn btn-outline-danger btn-sm" @onclick="@(e => DeleteUserAsync(item.SurveyId))">Del</button>
+                <button class="btn btn-outline-danger btn-sm" @onclick="@(e => Edit(item.SurveyId))">Edit</button>
+            </td>
+        </tr>
+
+    }
+</table>
+
+
+@code {
+
+
+    private List<EntSurvey> entSurveyInfo { get; set; } = new List<EntSurvey>();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        entSurveyInfo = await CRUD.ReadDataAsync<EntSurvey>("sp_ReadAllSurveys", null);
+    }
+
+    public async Task DeleteUserAsync(string id)
+
+    {
+      
+        EntSurvey entInfo = new EntSurvey();
+        entInfo.SurveyId = id;
+        await CRUD.CUDAsync(entInfo, "sp_DeleteSurvey");
+        entSurveyInfo = await CRUD.ReadDataAsync<EntSurvey>("sp_ReadAllSurveys", null);
+    }
+
+    public void Edit(string SurveyId)
+    {
+        nm.NavigateTo("editsurvey/" + SurveyId);
+    }
+
+}

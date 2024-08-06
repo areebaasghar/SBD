@@ -1,19 +1,20 @@
 ﻿@page "/survey/{SurveyId}"
 @rendermode InteractiveServer
+@inject NavigationManager nm
 
 <h3>Create Survey</h3>
 
 <button @onclick="AddQuestion">Add Question</button>
+<button @onclick="SaveSurvey">Save Survey</button>
 
-@for (int counter = 0;counter<questions.Count(); counter++ )
-{ 
+@for (int counter = 0; counter < questions.Count(); counter++)
+{
 
     <div>
-            <Label>Question @(counter+1)</Label>
-            <Question SurveyId="@SurveyId"></Question>
+        <Label>Question @(counter + 1)</Label>
+        <AddQuestion SurveyId="@SurveyId"></AddQuestion>
         </div>
 }
-
 
 @code {
     [Parameter] public string SurveyId { get; set; }
@@ -28,6 +29,12 @@
     private void RemoveQuestion(EntQues question)
     {
         questions.Remove(question);
+
     }
 
+    private void SaveSurvey()
+    {
+        nm.NavigateTo("surveydetails" );
+        
+    }
 }
