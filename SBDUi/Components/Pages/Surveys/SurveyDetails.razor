@@ -41,6 +41,7 @@
             <td>
                 <button class="btn btn-outline-danger btn-sm" @onclick="@(e => DeleteUserAsync(item.SurveyId))">Del</button>
                 <button class="btn btn-outline-danger btn-sm" @onclick="@(e => Edit(item.SurveyId))">Edit</button>
+                <button class="btn btn-outline-danger btn-sm" @onclick="@(e => View(item.SurveyId))">View</button>
             </td>
         </tr>
 
@@ -63,7 +64,7 @@
     public async Task DeleteUserAsync(string id)
 
     {
-      
+
         EntSurvey entInfo = new EntSurvey();
         entInfo.SurveyId = id;
         await CRUD.CUDAsync(entInfo, "sp_DeleteSurvey");
@@ -73,6 +74,11 @@
     public void Edit(string SurveyId)
     {
         nm.NavigateTo("editsurvey/" + SurveyId);
+    }
+
+    public void  View(string SurveyId)
+    {
+        nm.NavigateTo("viewsurvey/" + SurveyId);
     }
 
 }

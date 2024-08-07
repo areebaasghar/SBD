@@ -1,0 +1,93 @@
+﻿@page "/viewsurvey/{sid}"
+@inject NavigationManager nm
+
+<h3>Survey Template</h3>
+<div class="mt-5">
+<table class="table     table-bordered">
+    <tr>
+        <th>
+                <h2>Title: @entSurvey.Title</h2>
+        </th>
+    </tr>
+    <tr>
+        <th>
+                <h3>Description:</h3>
+                <p>@entSurvey.Description</p>
+            </th>
+    </tr>
+    <tr>
+        <th>
+            <h3 class="text-lg-center">Questions</h3>
+        </th>
+    </tr>
+        @foreach (var item in entQuestions)
+        {
+            <tr>
+                <td>
+                    <p><strong>Question:</strong> @item.QuestionText</p>
+                    <p><strong>Type:</strong> @item.QuestionType</p>
+                    @if (item.QuestionType == "MCQ")
+                    {
+                        if (optionsDictionary.ContainsKey(item.QuestionId))
+                        {
+                            <span><strong>Options:</strong>
+                            @foreach (var option in optionsDictionary[item.QuestionId])
+                            {
+                                <span> ●  @option.OptionText </span>
+                            }
+                            </span>
+                        }
+                        else
+                        {
+                            <p>Loading options...</p>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+@code {
+    [Parameter] public string? sid { get; set; }
+    private EntSurvey entSurvey = new();
+    private List<EntQues> entQuestions = new();
+    private Dictionary<string, List<EntOption>> optionsDictionary = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(sid))
+        {
+            await LoadSurveyAsync(sid);
+            await LoadQuestionsAsync(sid);
+        }
+    }
+
+    private async Task LoadSurveyAsync(string surveyId)
+    {
+        EntSurvey ents = new EntSurvey { SurveyId = surveyId };
+        List<EntSurvey> entSurveys = new List<EntSurvey>();
+        entSurveys = await CRUD.ReadDataAsync<EntSurvey>("sp_ReadSurvey", ents);
+        if (entSurveys.Any())
+        {
+            entSurvey = entSurveys.First();
+        }
+    }
+
+    private async Task LoadQuestionsAsync(string surveyId)
+    {
+        EntQues entq = new EntQues { SurveyId = surveyId };
+
+        entQuestions = await CRUD.ReadDataAsync<EntQues>("sp_ReadQuestionsBySurveyID", entq);
+
+        foreach (var question in entQuestions)
+        {
+            if (question.QuestionType == "MCQ")
+            {
+                EntOption ento = new EntOption { QuestionId = question.QuestionId };
+                List<EntOption> options = await CRUD.ReadDataAsync<EntOption>("sp_ReadOptionsByQID", ento);
+                optionsDictionary[question.QuestionId] = options;
+            }
+        }
+    }
+}
