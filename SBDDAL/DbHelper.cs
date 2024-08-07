@@ -14,8 +14,10 @@ namespace SBDDAL
         public static SqlConnection GetConnection()
 
         {
-            return new SqlConnection("Data Source=DESKTOP-1VNNIKF;Initial Catalog=SBD_db;Integrated Security=True;TrustServerCertificate=True");
+            return new SqlConnection("Data Source=Muhammad-Umer;Initial Catalog=SBD_db;Integrated Security=True;Encrypt=False");
         }
 
     }
 }
+//return new SqlConnection("Data Source=Muhammad-Umer;Initial Catalog=SBD_db;Integrated Security=True;Encrypt=False");
+//return new SqlConnection("Data Source=DESKTOP-1VNNIKF;Initial Catalog=SBD_db;Integrated Security=True;TrustServerCertificate=True");
