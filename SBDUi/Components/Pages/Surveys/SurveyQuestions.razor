@@ -1,0 +1,255 @@
+﻿@page "/updatequestions/{sid}"
+@page "/addquestions/{sid}"
+@inject NavigationManager nm
+@rendermode InteractiveServer
+
+<h3>Survey Template</h3>
+<table class="table table-bordered">
+    <tr>
+        <th>
+            <h2>Title: @entSurvey.Title</h2>
+        </th>
+    </tr>
+    <tr>
+        <th>
+            <h3>Description:</h3>
+            <p>@entSurvey.Description</p>
+        </th>
+    </tr>
+</table>
+
+
+<button @onclick="AddQuestion">Add Question</button>
+
+
+<table >
+        <tr>
+            
+            <th>
+                Question Id
+            </th>
+            <th>
+                Question Text
+            </th>
+            <th>
+                Question Type
+            </th>
+        </tr>
+ 
+    @for (int i = 0; i < entQuestions.Count; i++)
+    {
+        var question = entQuestions[i];
+        if (question == null)
+        {
+            continue; 
+        }
+
+
+
+
+
+
+       
+            <tr>
+         <td>
+            <input type="text" placeholder="Question ID" @bind="question.QuestionId" />
+        </td>
+
+        <td>
+            <input type="text" placeholder="Enter Question text here" @bind="question.QuestionText" />
+        </td>
+        <td>
+            <select @bind = "question.QuestionType"> 
+                <option value="">
+                    Select Question Type
+                </option>
+                <option value="MCQ">
+                    MCQ
+                </option>
+                <option value="Rating">
+                   Rating
+                </option>
+                <option value="Text">
+                    Text
+                </option>
+            </select>
+        </td>
+            </tr>
+
+            @if (question.QuestionType == "MCQ")
+           
+
+            {
+                if (optionsDictionary.ContainsKey(question.QuestionId))
+                {
+
+ 
+
+                    
+                        <tr> 
+                        <td>
+                            Option Id
+                        </td>
+                        <td>
+                            Option Text
+                        </td>
+                            
+                        </tr>
+                        @foreach (var option in optionsDictionary[question.QuestionId])
+                        {
+                        <tr>
+                            
+
+                            <td>
+                            <input type="text" placeholder="Enter Option Id here" @bind="option.OptionId" />
+                            </td>
+
+                        <td>
+                            <input type="text" placeholder="Enter Option text here" @bind="option.OptionText" />
+                        </td>
+                        </tr>
+                        }
+
+               
+                }
+                else
+                {
+              
+                    optionsDictionary[question.QuestionId] = new List<EntOption>();
+                }
+
+                <button type="button" @onclick="() => AddOption(question.QuestionId)">Add Option</button>
+                <br />
+            }
+      
+           
+    }
+    </table>
+
+<button @onclick="SubmitQuestions">Save</button>
+<p class="text-danger">@ErrorMessage</p>
+
+@code {
+    [Parameter] public string? sid { get; set; }
+    private EntSurvey entSurvey = new();
+    private List<EntQues> entQuestions = new();
+    private Dictionary<string, List<EntOption>> optionsDictionary = new();
+    private string ErrorMessage { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(sid))
+        {
+            await LoadSurveyAsync(sid);
+            await LoadQuestionsAsync(sid);
+        }
+    }
+
+    private async Task SubmitQuestions()
+    {
+        try
+        {
+
+            await SaveQuestionAsync();
+
+            nm.NavigateTo("SurveyDetails/");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "*All fields required*";
+            throw ex;
+        }
+    }
+
+    private void AddQuestion()
+    {
+        entQuestions.Add(new EntQues { SurveyId = sid });
+    }
+
+    private void AddOption(string id)
+    {
+        if (!optionsDictionary.ContainsKey(id))
+        {
+            optionsDictionary[id] = new List<EntOption>();
+        }
+        optionsDictionary[id].Add(new EntOption { QuestionId = id });
+    }
+
+
+    private async Task SaveQuestionAsync()
+    {
+        foreach (var question in entQuestions)
+        {
+            var q = new EntQues { QuestionId = question.QuestionId};
+            var ques = await CRUD.ReadDataAsync<EntQues>("sp_ReadQuestion", q);
+
+            if (ques.Count() >= 1)
+            {
+                await CRUD.CUDAsync(question, "sp_UpdateQuestion");
+
+                if (question.QuestionType == "MCQ" && optionsDictionary.ContainsKey(question.QuestionId))
+                {
+                    foreach (var option in optionsDictionary[question.QuestionId])
+                    {
+                        var o = new EntOption { OptionId= option.OptionId };
+                        var opt = await CRUD.ReadDataAsync<EntOption>("sp_ReadOption", o);
+
+                        option.QuestionId = question.QuestionId;
+                        if(opt.Count>=1)
+                        {
+                            await CRUD.CUDAsync(option, "sp_UpdateOption");
+                        }
+                        else
+                        {
+                            
+                            await CRUD.CUDAsync(option, "sp_CreateOption");
+
+                        }
+
+                            }
+                }
+            }
+            else
+            {
+                await CRUD.CUDAsync(question, "sp_CreateQuestion");
+
+                if (question.QuestionType == "MCQ" && optionsDictionary.ContainsKey(question.QuestionId))
+                {
+                    foreach (var option in optionsDictionary[question.QuestionId])
+                    {
+                        option.QuestionId = question.QuestionId;
+                        await CRUD.CUDAsync(option, "sp_CreateOption");
+                    }
+                }
+                
+            }
+
+        }
+    }
+
+    private async Task LoadSurveyAsync(string surveyId)
+    {
+        EntSurvey ents = new EntSurvey { SurveyId = surveyId };
+        var entSurveys = await CRUD.ReadDataAsync<EntSurvey>("sp_ReadSurvey", ents);
+        if (entSurveys.Any())
+        {
+            entSurvey = entSurveys.First();
+        }
+    }
+
+    private async Task LoadQuestionsAsync(string surveyId)
+    {
+        EntQues entq = new EntQues { SurveyId = surveyId };
+        entQuestions = await CRUD.ReadDataAsync<EntQues>("sp_ReadQuestionsBySurveyID", entq);
+
+        foreach (var question in entQuestions)
+        {
+            if (question.QuestionType == "MCQ")
+            {
+                EntOption ento = new EntOption { QuestionId = question.QuestionId };
+                var options = await CRUD.ReadDataAsync<EntOption>("sp_ReadOptionsByQID", ento);
+                optionsDictionary[question.QuestionId] = options;
+            }
+        }
+    }
+}

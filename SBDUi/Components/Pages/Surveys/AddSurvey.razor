@@ -1,5 +1,5 @@
 ﻿@page "/addsurveydetails"
-@page "/editsurvey/{sid}"
+@page "/editsurveydetails/{sid}"
 @inject NavigationManager nm
 @rendermode InteractiveServer
 <h3>New Survey</h3>
@@ -67,18 +67,18 @@
             {
 
                 await CRUD.CUDAsync(ents, "sp_CreateSurvey");
-               
+                nm.NavigateTo("addquestions/" + ents.SurveyId);
+                
             }
             else if (ButtonName=="Update")
             {
                 await CRUD.CUDAsync(ents, "sp_UpdateSurvey");
-
-
-             
+                nm.NavigateTo("updatequestions/" + ents.SurveyId);
 
             }
-            nm.NavigateTo("survey/"+ents.SurveyId);
-           
+            
+            
+
 
         }
 
