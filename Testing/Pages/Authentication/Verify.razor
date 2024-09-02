@@ -1,0 +1,54 @@
+﻿@page "/verification"
+@using Model
+@inject Testing.Authentication.EmailService emailService
+@inject NavigationManager Navigation
+@inject IJSRuntime js
+
+<h3>Email Verification</h3>
+
+@if (!isOtpSent)
+{
+    <EditForm Model="mail">
+        <div>
+            <label for="email">Email:</label>
+            <InputText @bind-Value="mail.Email" id="email" placeholder="Enter your email" />
+        </div>
+        <button type="button" @onclick="SendOtp">Send OTP</button>
+    </EditForm>
+}
+else
+{
+    <EditForm Model="mail">
+        <div>
+            <label for="otp">OTP:</label>
+            <InputText @bind-Value="Otp" id="otp" placeholder="Enter OTP" />
+        </div>
+        <button type="button" @onclick="VerifyOtp">Verify OTP</button>
+    </EditForm>
+}
+
+@code {
+    private bool isOtpSent = false;
+    private OtpEmail mail = new OtpEmail();
+    private string Otp { get; set; }
+    private string GeneratedOtp { get; set; }
+
+    private async Task SendOtp()
+    {
+        GeneratedOtp = new Random().Next(100000, 999999).ToString();
+        await emailService.SendEmailAsync(mail.Email, "Your OTP Code", $"Your OTP is: {GeneratedOtp}");
+        isOtpSent = true;
+    }
+
+    private async Task VerifyOtp()
+    {
+        if (Otp == GeneratedOtp)
+        {
+            Navigation.NavigateTo($"/register?email={mail.Email}");
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", "Invalid OTP entered");
+        }
+    }
+}

@@ -1,0 +1,92 @@
+﻿@inherits LayoutComponentBase
+@using System.Security.Claims
+@using System.IdentityModel.Tokens.Jwt
+@using Testing.Authentication
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager navManager
+@inject AuthenticationStateProvider authStateProvider
+@inject IJSRuntime js
+
+<PageTitle>Blazor Server App</PageTitle>
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu></NavMenu>
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <AuthorizeView>
+                <Authorized>
+                    <p>@username</p>
+                    <a @onclick="Logout" href="javascript:void(0)">Logout</a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/login">Login</a>
+                    <a href="/verification">Register</a>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    private string? username;
+    protected override Task OnInitializedAsync()
+    {
+        username = null;
+        return base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var token = await js.InvokeAsync<string>("blazorLocalStorage.get", "authToken");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                username = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+                StateHasChanged();
+
+
+            }
+
+        }
+        else
+        {
+            var token = await js.InvokeAsync<string>("blazorLocalStorage.get", "authToken");
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jwtToken = handler.ReadJwtToken(token);
+                username = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
+                StateHasChanged();
+
+
+            }
+        }
+
+    }
+
+
+
+
+
+    private async Task Logout()
+    {
+        var token = await js.InvokeAsync<string>("blazorLocalStorage.remove", "authToken");
+        var jwtAuthStateProvider = (JwtAuthenticationStateProvider)authStateProvider;
+        await jwtAuthStateProvider.MarkUserAsLoggedOut();
+        navManager.NavigateTo("/login");
+        
+    }
+    
+}

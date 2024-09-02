@@ -1,0 +1,53 @@
+﻿@page "/login"
+@using Model
+@using Testing.Authentication
+@inject AuthenticationStateProvider authStateProvider
+@inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager navManager
+@inject IJSRuntime js
+
+<div class="col-lg-4 offset-lg-4 pb-4 border">
+    <div class="mb-3 text-center">
+        <h3>Login</h3>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">User Name</label>
+        <input @bind="model.UserName" type="text" class="form-control" placeholder="User Name" />
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input @bind="model.Password" type="password" class="form-control" placeholder="Password" />
+    </div>
+    <div class="mb-3">
+        <button @onclick="PerformLogin" class="btn btn-primary">Login</button>
+    </div>
+</div>
+
+@code {
+
+    private Login_Model model = new Login_Model();
+    private string? username{ get; set; }
+
+    private async Task PerformLogin()
+    {
+        var httpClient = HttpClientFactory.CreateClient("ServerAPI");
+
+        var response = await httpClient.PostAsJsonAsync("api/auth/login", model);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var result = await response.Content.ReadFromJsonAsync<LoginToken>();
+            if (result != null )
+            {
+                var jwtAuthStateProvider = (JwtAuthenticationStateProvider)authStateProvider;
+                await jwtAuthStateProvider.MarkUserAsAuthenticated(result.Token);
+                await js.InvokeVoidAsync("blazorLocalStorage.set", "authToken", result.Token);
+                navManager.NavigateTo("/"); 
+            }
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", "Login failed. Please check your credentials.");
+        }
+    }
+}
