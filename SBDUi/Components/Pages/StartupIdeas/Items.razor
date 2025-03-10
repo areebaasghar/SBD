@@ -1,0 +1,63 @@
+﻿@page "/items/{SubCatId}"
+@rendermode InteractiveServer
+<h3>Items</h3>
+<EditForm Model="entItem" OnSubmit="SaveItems" FormName="Items">
+
+    <div class="d-flex">
+        <input type="text" placeholder="Enter Sub Category Name" @bind-value="entItem.ItemName" class="form-control" />
+
+        <button class="btn btn-primary">Add</button>
+    </div>
+
+
+</EditForm>
+<div class="card mt-4">
+    <div class="card-body">
+        <table class="table table-bordered">
+
+            <tr>
+                <th>Items Id</th>
+                <th>Item Name</th>
+                <th>Action</th>
+            </tr>
+            @foreach (var item in entItems)
+            {
+                <tr>
+                    <td>@item.ItemId</td>
+                    <td>@item.ItemName</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-success">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger">Del</button>
+                        <a href="itemsbrand/@item.ItemId">Add Brand</a>
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? SubCatId{ get; set; }
+    EntItems entItem { get; set; } = new EntItems();
+    List<EntItems> entItems{ get; set; } = new List<EntItems>();
+
+    private async Task SaveItems()
+    {
+        await CRUD.CUDAsync(entItem, "sp_SaveItems");
+
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(SubCatId))
+        {
+            entItem.fk_SubCatId = int.Parse(SubCatId);
+            entItems = await CRUD.ReadDataAsync<EntItems>("sp_GetItems", entItem);
+        }
+
+    }
+
+
+}

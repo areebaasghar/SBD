@@ -1,0 +1,70 @@
+﻿@page "/subcategories/{CatId}"
+@rendermode InteractiveServer
+<h3>Categories</h3>
+
+<EditForm Model="entSubCategory" OnSubmit="SaveCate" FormName="categories">
+
+    <div class="d-flex">
+        <input type="text" placeholder="Enter Sub Category Name" @bind-value="entSubCategory.SubCatogeryName" class="form-control" />
+        <input type="number" placeholder="Enter min budget" @bind-value="entSubCategory.MinBudget" class="form-control" />
+        <input type="number" placeholder="Enter max budget" @bind-value="entSubCategory.MaxBudget" class="form-control" />
+        <input type="text" placeholder="Enter Sub category descriptiin" @bind-value="entSubCategory.Description" class="form-control" />
+
+        <button class="btn btn-primary">Add</button>
+    </div>
+
+
+</EditForm>
+<div class="card mt-4">
+    <div class="card-body">
+        <table class="table table-bordered">   
+
+            <tr>
+                <th>Category Id</th>
+                <th>Category Name</th>
+                <th>Action</th>
+            </tr>
+            @foreach (var item in entSubCategories)
+            {
+                <tr>
+                    <td>@item.SubCategoryId</td>
+                    <td>@item.SubCatogeryName</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-success">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger">Del</button>
+                        <a href="items/@item.SubCategoryId">Add Items</a>
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+</div>
+
+
+@code {
+    EntSubCategories entSubCategory{ get; set; } = new EntSubCategories();
+    List<EntSubCategories> entSubCategories = new List<EntSubCategories>();
+    [Parameter] public string? CatId{ get; set; } 
+    private async Task SaveCate()
+    {
+        
+        
+
+        await CRUD.CUDAsync(entSubCategory, "sp_SaveSubCategories");
+
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(CatId))
+        {
+           entSubCategory.fk_CategoryId = int.Parse(CatId);
+            entSubCategories = await CRUD.ReadDataAsync<EntSubCategories>("sp_GetSubCategories", entSubCategory);
+        } 
+
+    }
+
+
+}

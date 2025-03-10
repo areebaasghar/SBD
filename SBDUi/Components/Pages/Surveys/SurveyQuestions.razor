@@ -17,114 +17,95 @@
         </th>
     </tr>
 </table>
-
-
 <button @onclick="AddQuestion">Add Question</button>
+<table>
+    <tr>
 
+        <th>
+            Question Id
+        </th>
+        <th>
+            Question Text
+        </th>
+        <th>
+            Question Type
+        </th>
+    </tr>
 
-<table >
-        <tr>
-            
-            <th>
-                Question Id
-            </th>
-            <th>
-                Question Text
-            </th>
-            <th>
-                Question Type
-            </th>
-        </tr>
- 
     @for (int i = 0; i < entQuestions.Count; i++)
     {
         var question = entQuestions[i];
         if (question == null)
         {
-            continue; 
+            continue;
         }
+        <tr>
+            <td>
+                <input type="text" placeholder="Question ID" @bind="question.QuestionId" />
+            </td>
 
+            <td>
+                <input type="text" placeholder="Enter Question text here" @bind="question.QuestionText" />
+            </td>
+            <td>
+                <select @bind="question.QuestionType">
+                    <option value="">
+                        Select Question Type
+                    </option>
+                    <option value="MCQ">
+                        MCQ
+                    </option>
+                    <option value="Rating">
+                        Rating
+                    </option>
+                    <option value="Text">
+                        Text
+                    </option>
+                </select>
+            </td>
+        </tr>
 
-
-
-
-
-       
-            <tr>
-         <td>
-            <input type="text" placeholder="Question ID" @bind="question.QuestionId" />
-        </td>
-
-        <td>
-            <input type="text" placeholder="Enter Question text here" @bind="question.QuestionText" />
-        </td>
-        <td>
-            <select @bind = "question.QuestionType"> 
-                <option value="">
-                    Select Question Type
-                </option>
-                <option value="MCQ">
-                    MCQ
-                </option>
-                <option value="Rating">
-                   Rating
-                </option>
-                <option value="Text">
-                    Text
-                </option>
-            </select>
-        </td>
-            </tr>
-
-            @if (question.QuestionType == "MCQ")
-           
-
+        @if (question.QuestionType == "MCQ")
+        {
+            if (optionsDictionary.ContainsKey(question.QuestionId))
             {
-                if (optionsDictionary.ContainsKey(question.QuestionId))
+                <tr>
+                    <td>
+                        Option Id
+                    </td>
+                    <td>
+                        Option Text
+                    </td>
+
+                </tr>
+                @foreach (var option in optionsDictionary[question.QuestionId])
                 {
-
- 
-
-                    
-                        <tr> 
+                    <tr>
                         <td>
-                            Option Id
-                        </td>
-                        <td>
-                            Option Text
-                        </td>
-                            
-                        </tr>
-                        @foreach (var option in optionsDictionary[question.QuestionId])
-                        {
-                        <tr>
-                            
-
-                            <td>
                             <input type="text" placeholder="Enter Option Id here" @bind="option.OptionId" />
-                            </td>
+                        </td>
 
                         <td>
                             <input type="text" placeholder="Enter Option text here" @bind="option.OptionText" />
                         </td>
-                        </tr>
-                        }
-
-               
-                }
-                else
-                {
-              
-                    optionsDictionary[question.QuestionId] = new List<EntOption>();
+                    </tr>
                 }
 
-                <button type="button" @onclick="() => AddOption(question.QuestionId)">Add Option</button>
-                <br />
+
             }
-      
-           
+            else
+            {
+
+                optionsDictionary[question.QuestionId] = new List<EntOption>();
+            }
+
+            <button type="button" @onclick="() => AddOption(question.QuestionId)">Add Option</button>
+            <br />
+        }
+
+
     }
-    </table>
+</table>
 
 <button @onclick="SubmitQuestions">Save</button>
 <p class="text-danger">@ErrorMessage</p>
@@ -168,7 +149,7 @@
 
     private void AddOption(string id)
     {
-        if (!optionsDictionary.ContainsKey(id))
+        if (!optionsDictionary.ContainsKey(id)) 
         {
             optionsDictionary[id] = new List<EntOption>();
         }
@@ -180,7 +161,7 @@
     {
         foreach (var question in entQuestions)
         {
-            var q = new EntQues { QuestionId = question.QuestionId};
+            var q = new EntQues { QuestionId = question.QuestionId };
             var ques = await CRUD.ReadDataAsync<EntQues>("sp_ReadQuestion", q);
 
             if (ques.Count() >= 1)
@@ -191,22 +172,22 @@
                 {
                     foreach (var option in optionsDictionary[question.QuestionId])
                     {
-                        var o = new EntOption { OptionId= option.OptionId };
+                        var o = new EntOption { OptionId = option.OptionId };
                         var opt = await CRUD.ReadDataAsync<EntOption>("sp_ReadOption", o);
 
                         option.QuestionId = question.QuestionId;
-                        if(opt.Count>=1)
+                        if (opt.Count >= 1)
                         {
                             await CRUD.CUDAsync(option, "sp_UpdateOption");
                         }
                         else
                         {
-                            
+
                             await CRUD.CUDAsync(option, "sp_CreateOption");
 
                         }
 
-                            }
+                    }
                 }
             }
             else
@@ -221,7 +202,7 @@
                         await CRUD.CUDAsync(option, "sp_CreateOption");
                     }
                 }
-                
+
             }
 
         }

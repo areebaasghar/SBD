@@ -43,7 +43,7 @@
             <td>@item.BusinessPhone</td>
             <td>@item.BusinessEmail</td>
             <td>
-                <button class="btn btn-outline-danger btn-sm" @onclick="@(e => DeleteUserAsync(item.BusinessId))">Del</button>
+                <button class="btn btn-outline-danger btn-sm" @onclick="@(e => DeleteUserAsync(item.BusinessId))">Del</button>@*  ?? *@
                 <button class="btn btn-outline-danger btn-sm" @onclick="@(e => Edit(item.BusinessId))">Edit</button>
             </td>
         </tr>

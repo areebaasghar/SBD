@@ -16,8 +16,7 @@ namespace SBDDAL
             try
             {
                 using (var con = DbHelper.GetConnection())
-                {
-                    await con.OpenAsync();
+                { await con.OpenAsync();
                     SqlCommand cmd = new SqlCommand(storedProcedure, con);
                     cmd.CommandType = CommandType.StoredProcedure;
                     if (model != null)
@@ -27,7 +26,18 @@ namespace SBDDAL
                             var value = property.GetValue(model);
                             if (value != null && !string.IsNullOrEmpty(value.ToString()))
                             {
-                                cmd.Parameters.AddWithValue($"@{property.Name}", value);
+                                if (value is int)
+                                {
+                                    if (int.Parse(value.ToString()) > 0)
+                                    {
+                                        cmd.Parameters.AddWithValue($"@{property.Name}", value);
+                                    }
+                              
+                                }
+                                else
+                                {
+                                    cmd.Parameters.AddWithValue($"@{property.Name}", value);
+                                }
                             }
                         }
                     }
@@ -119,7 +129,18 @@ namespace SBDDAL
                         var value = property.GetValue(entity);
                         if (value != null && !string.IsNullOrEmpty(value.ToString()))
                         {
-                            cmd.Parameters.AddWithValue($"@{property.Name}", value);
+                            if (value is int)
+                            {
+                                if (int.Parse(value.ToString()) > 0)
+                                {
+                                    cmd.Parameters.AddWithValue($"@{property.Name}", value);
+                                }
+
+                            }
+                            else
+                            {
+                                cmd.Parameters.AddWithValue($"@{property.Name}", value);
+                            }
                         }
                     }
 

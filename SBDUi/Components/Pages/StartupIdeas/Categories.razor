@@ -1,0 +1,59 @@
+﻿@page "/categories"
+@rendermode InteractiveServer
+<h3>Categories</h3>
+
+<EditForm Model="entCategory" OnSubmit="SaveCate" FormName="categories">
+    
+    <div class="d-flex">
+        <input type="text" placeholder="Enter Category Name" @bind-value="entCategory.CatogeryName" class="form-control" />
+
+        <button class="btn btn-primary">Add</button>
+    </div>
+               
+       
+</EditForm>
+<div class="card mt-4">
+    <div class="card-body">
+        <table class="table table-bordered">
+
+            <tr>
+                <th>Category Id</th>
+                <th>Category Name</th>
+                <th>Action</th>
+            </tr>
+            @foreach (var item in entCategories)
+            {
+                <tr>
+                    <td>@item.CategoryId</td>
+                    <td>@item.CatogeryName</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-success">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger">Del</button>
+                        <a href="subcategories/@item.CategoryId">Add Sub</a>
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+</div>
+
+
+@code {
+    EntCategory entCategory = new EntCategory();
+    List<EntCategory> entCategories{ get; set; } = new List<EntCategory>();
+
+    private async Task SaveCate()
+    {
+        await CRUD.CUDAsync(entCategory, "sp_SaveCategory");
+
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        entCategories = await CRUD.ReadDataAsync<EntCategory>("sp_GetCategories", entCategory);
+
+    }
+   
+}

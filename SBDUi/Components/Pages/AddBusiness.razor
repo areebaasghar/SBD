@@ -16,8 +16,8 @@
 </EditForm>
 
 @code {
-    [Parameter] public string? bid { get; set; }//[parameter]?
-    EntBD entbd { get; set; } = new EntBD(); // {get; set;}?
+    [Parameter] public string? bid { get; set; }
+    EntBD entbd { get; set; } = new EntBD(); 
     private string ErrorMessage;
 
     private string ButtonName { get; set; } = "Save";
@@ -68,7 +68,7 @@
         eu.BusinessId = bid;
         EntBDs = await SBDDAL.CRUD.ReadDataAsync<EntBD>("sp_ReadBusinessDetails", eu);
 
-        if (EntBDs.Count > 0)
+        if (EntBDs.Count > 0)  //??
         {
             entbd = EntBDs[0];
         }

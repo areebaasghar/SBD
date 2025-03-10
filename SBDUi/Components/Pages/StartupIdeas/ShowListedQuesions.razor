@@ -1,0 +1,49 @@
+﻿@page "/listedquestions"
+@rendermode InteractiveServer
+@inject NavigationManager nm
+
+<h3>Show Listed Quesions</h3>
+<NavLink href="createlistedquestions" class="btn btn-primary">Create New</NavLink>
+<div class="card mt-4">
+    <div class="card-body">
+        <table class="table table-bordered">
+
+            <tr>
+                <th>QId</th>
+                <th>Sub Category</th>
+                <th>Item</th>
+                <th>Question</th>
+                <th>Type</th>
+                <th>Action</th>
+            </tr>
+            @foreach (var item in entListedQuestionsDtos)
+            {
+                <tr>
+                    <td>@item.QuestionId</td>
+                    <td>@item.SubCatogeryName</td>
+                    <td>@item.ItemName</td>
+                    <td>@item.QuestionText</td>
+                    <td>@item.QuestionType</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger">Del</button>
+                    </td>
+                </tr>
+            }
+
+        </table>
+    </div>
+</div>
+
+@code {
+
+
+    private List<EntListedQuestionsDto> entListedQuestionsDtos = new();
+    EntListedQuestionsDto entListedQuestionsDto{ get; set; } = new EntListedQuestionsDto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        entListedQuestionsDtos = await SBDDAL.CRUD.ReadDataAsync<EntListedQuestionsDto>("sp_ReadListedQuestions", entListedQuestionsDto);
+    
+    }
+
+}
